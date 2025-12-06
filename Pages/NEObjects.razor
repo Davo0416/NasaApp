@@ -1,0 +1,231 @@
+﻿@page "/NEObjects"
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<PageTitle>Near-Earth Objects</PageTitle>
+
+<div style="display:flex;">
+    <h1 class="white" style="margin-right:20px; width:fit-content; white-space: nowrap;">
+        Near-Earth Objects
+    </h1>
+
+    <input @bind="query"
+           @bind:event="oninput"
+           @onkeydown="HandleKeyPress"
+           type="text"
+           placeholder="Search..." />
+
+    <button @onclick="Search" type="button">
+        <span class="oi oi-magnifying-glass" aria-hidden="true"></span>
+    </button>
+</div>
+
+@if (isLoading)
+{
+    <p class="white">Loading...</p>
+}
+else if (results == null || results.Count == 0)
+{
+    <p class="white">No results.</p>
+}
+else
+{
+    <div class="imageCardContainer">
+
+        @foreach (ImageCard item in results)
+        {
+            <div class="imageCard_@item.Hazardous" @onclick="() => OpenImage(item)">
+                <div style="padding-bottom:10px;">
+                    <img src="@item.ImageUrl"
+                     alt="test"
+                     style="width:100%; height:180px; object-fit:cover;" />
+                    
+                    <div style="display:flex; justify-content:space-between;">
+                        <p style="margin:0; font-size:14px; opacity:0.7; color:white; padding:10px;">
+                            @item.Date
+                        </p>
+                        @if (item.Hazardous != null)
+                            @if(item.Hazardous.Equals("True")){
+                                <span style="padding: 5px; margin-top: 5px; margin-right: 5px; font-size: large; color: rgb(189, 28, 28);" class="oi oi-warning" aria-hidden="true"></span>
+                            }
+                    </div>
+                    <h3 class="imageCardTitle" style="padding:10px;">@item.Title</h3>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (selectedItem != null)
+{
+    <div class="modal-overlay" @onclick="CloseImage">
+        <div class="modal-content_@selectedItem.Hazardous" @onclick:stopPropagation="true">
+            <img src="@selectedItem.ImageUrl"
+                     alt="test"
+                     style="width:100%; height:auto; object-fit:cover; border-radius: 10px; margin-bottom: 10px;" />
+            <div style="display:flex; justify-content:space-between;">
+                <h2>@selectedItem.Title</h2>
+                @if (selectedItem.Hazardous != null)
+                    @if (selectedItem.Hazardous.Equals("True"))
+                    {
+                        <span style="padding: 5px; margin-top: 5px;margin-right: 5px; font-size: x-large; color: rgb(189, 28, 28);" class="oi oi-warning"
+                            aria-hidden="true"></span>
+                    }
+            </div>
+            <pre style="white-space:pre-wrap; font-family:inherit;">
+                @selectedItem.Description
+            </pre>
+            <a href=@selectedItem.JPLUrl>View Source</a><br/><br/>
+            <button style="border-radius: 5px; border:2px solid transparent;"
+                @onclick="CloseImage">Close</button>
+        </div>
+    </div>
+}
+
+@code {
+
+    Random r = new Random();
+
+    // ---------- Card model ----------
+    public class ImageCard
+    {
+        public string? Title { get; set; }
+        public string? Date { get; set; }
+        public string? Description { get; set; }
+        public string? ImageUrl { get; set; }
+        public string? Hazardous { get; set; }
+        public string? JPLUrl { get; set; }
+    }
+
+    // ---------- NEO API Models ----------
+    public class NeoRoot
+    {
+        public List<NearEarthObject>? near_earth_objects { get; set; }
+    }
+
+    public class NearEarthObject
+    {
+        public string? id { get; set; }
+        public string? name { get; set; }
+        public double? absolute_magnitude_h { get; set; }
+        public EstimatedDiameter? estimated_diameter { get; set; }
+        public bool is_potentially_hazardous_asteroid { get; set; }
+        public List<CloseApproach>? close_approach_data { get; set; }
+        public string? nasa_jpl_url { get; set; }
+    }
+
+    public class EstimatedDiameter
+    {
+        public DiameterUnit? kilometers { get; set; }
+    }
+
+    public class DiameterUnit
+    {
+        public double estimated_diameter_min { get; set; }
+        public double estimated_diameter_max { get; set; }
+    }
+
+    public class CloseApproach
+    {
+        public string? close_approach_date { get; set; }
+        public RelativeVelocity? relative_velocity { get; set; }
+        public MissDistance? miss_distance { get; set; }
+    }
+
+    public class RelativeVelocity
+    {
+        public string? kilometers_per_hour { get; set; }
+    }
+
+    public class MissDistance
+    {
+        public string? kilometers { get; set; }
+    }
+
+    // ---------- State ----------
+    string query = "";
+    bool isLoading = false;
+    List<ImageCard> results = new();
+    ImageCard? selectedItem;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Search();
+    }
+
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await Search();
+    }
+
+    // ---------- Search ----------
+    private async Task Search()
+    {
+        isLoading = true;
+        results.Clear();
+
+        try
+        {
+            string apiKey = "yhOmsJLxTQMdT9kCgMeoyosvgyQVSYx4gLbz0eHR";
+            string url = $"https://api.nasa.gov/neo/rest/v1/neo/browse?api_key={apiKey}";
+
+            var root = await Http.GetFromJsonAsync<NeoRoot>(url);
+
+            if (root?.near_earth_objects == null)
+                return;
+
+            var asteroids = root.near_earth_objects;
+
+            // Optional: filter by name
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                asteroids = asteroids
+                    .Where(a => a.name != null &&
+                                a.name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
+
+            foreach (NearEarthObject a in asteroids)
+            {
+                var approach = a.close_approach_data?.FirstOrDefault();
+
+                results.Add(new ImageCard
+                {
+                    Title = a.name,
+                    Date = approach?.close_approach_date ?? "No Date",
+                    Description =
+                        $"ID: {a.id}\n" +
+                        $"Absolute Magnitude: {a.absolute_magnitude_h}\n" +
+                        $"Diameter (km): {a.estimated_diameter?.kilometers?.estimated_diameter_min:0.00} - " +
+                        $"{a.estimated_diameter?.kilometers?.estimated_diameter_max:0.00}\n" +
+                        $"Hazardous: {a.is_potentially_hazardous_asteroid}\n" +
+                        $"Closest Approach: {approach?.miss_distance?.kilometers} km\n" +
+                        $"Velocity: {approach?.relative_velocity?.kilometers_per_hour} km/h",
+                    ImageUrl = "Asteroid" + a.is_potentially_hazardous_asteroid + r.Next(0, 2) + ".jpg",
+                    Hazardous = a.is_potentially_hazardous_asteroid.ToString(),
+                    JPLUrl = a.nasa_jpl_url
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("NEO Error: " + ex.Message);
+        }
+
+        isLoading = false;
+    }
+
+    // ---------- Modal ----------
+    void OpenImage(ImageCard item)
+    {
+        JS.InvokeVoidAsync("disableScroll");
+        selectedItem = item;
+    }
+
+    void CloseImage()
+    {
+        JS.InvokeVoidAsync("enableScroll");
+        selectedItem = null;
+    }
+}

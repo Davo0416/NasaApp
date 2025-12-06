@@ -1,0 +1,50 @@
+﻿@page "/apod"
+@inject HttpClient Http
+
+<PageTitle>NASA Astronomy Picture Of The Day</PageTitle>
+
+<h1 class="white">NASA Astronomy Picture Of The Day</h1>
+
+@if (apod == null)
+{
+    <p class="white">Loading...</p>
+}
+else
+{
+    <h2 class="white" style="margin-top: 25px;">@apod.Title</h2>
+    <div style="display:flex;">
+        <div class="image">
+            @if (apod.Media_type == "image")
+            {
+                <img src="@apod.Url" style="max-width:100%; width:100%; border-radius:10px;" />
+            }
+        </div>
+        <div class="description">
+            <p style="color:rgb(200, 126, 204)"><strong>Date:</strong> @apod.Date</p>
+            <p class="white">@apod.Explanation</p>
+        </div>
+    </div>
+}
+
+@code {
+    public class NasaApod
+    {
+        public string? Date { get; set; }
+        public string? Explanation { get; set; }
+        public string? Hdurl { get; set; }
+        public string? Media_type { get; set; }
+        public string? Service_version { get; set; }
+        public string? Title { get; set; }
+        public string? Url { get; set; }
+    }
+
+    private NasaApod? apod;
+
+    string apiUrl = "https://api.nasa.gov/planetary/apod?api_key=";
+    string apiKey = "yhOmsJLxTQMdT9kCgMeoyosvgyQVSYx4gLbz0eHR";
+
+    protected override async Task OnInitializedAsync()
+    {
+        apod = await Http.GetFromJsonAsync<NasaApod>($"{apiUrl}{apiKey}");
+    }
+}
