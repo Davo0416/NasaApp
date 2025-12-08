@@ -8,7 +8,7 @@
     <h1 class="white" style="margin-right:20px; white-space: nowrap;">
         Near-Earth Objects
     </h1>
-
+    <!-- Approach Date Calendar Selector & Search Button -->
     <div style="display:flex; align-items:stretch;">
         <h2 class="white" style="white-space: nowrap; margin-right:10px;">
             Approximate Approach Date
@@ -22,14 +22,17 @@
     </div>
 </div>
 
+<!-- Displaying a loading message while the data is being requested from the API -->
 @if (isLoading)
 {
     <p class="white">Loading...</p>
 }
+<!-- Displaying a no results message if the API returned with no results -->
 else if (results == null || results.Count == 0)
 {
     <p class="white">No results.</p>
 }
+<!-- Displaying the NEObjects and associated information provided by the API -->
 else
 {
     <div class="imageCardContainer">
@@ -43,6 +46,7 @@ else
                         <p style="margin:0; font-size:14px; opacity:0.7; color:white; padding:10px;">
                             @item.Date
                         </p>
+                        <!-- Adding a warning icon if the object is potentially hazardous -->
                         @if (item.Hazardous == "True")
                         {
                             <span style="padding: 5px; margin-top: 5px; margin-right: 5px; font-size: large;
@@ -56,7 +60,7 @@ else
         }
     </div>
 }
-
+<!-- Displaying a focused version of the object with extra information when clicked -->
 @if (selectedItem != null)
 {
     <div class="modal-overlay" @onclick="CloseImage">
@@ -66,7 +70,7 @@ else
 
             <div style="display:flex; justify-content:space-between;">
                 <h2>@selectedItem.Title</h2>
-
+                <!-- Adding a warning icon if the object is potentially hazardous -->
                 @if (selectedItem.Hazardous == "True")
                 {
                     <span style="padding: 5px; margin-top: 5px; margin-right: 5px; font-size: x-large;
@@ -89,6 +93,7 @@ else
 
 @code {
 
+    //ImageCard class to store the image card data to be displayed on the page
     public class ImageCard
     {
         public string? Title { get; set; }
@@ -99,6 +104,7 @@ else
         public string? JPLUrl { get; set; }
     }
 
+    //Helper classes for processing the image data
     public class NeoRoot
     {
         public List<NearEarthObject>? near_earth_objects { get; set; }
@@ -109,6 +115,7 @@ else
         public Dictionary<string, List<NearEarthObject>>? near_earth_objects { get; set; }
     }
 
+    //NearEarthObject class & other helper classes to store the NEObject data provided by the API
     public class NearEarthObject
     {
         public string? id { get; set; }
@@ -154,31 +161,34 @@ else
     List<ImageCard> results = new();
     ImageCard? selectedItem;
 
+    //Triggering a search with todays date on page load
     protected override async Task OnInitializedAsync()
     {
         await Search();
     }
 
+    //Helper function used for the search button
     private async Task ButtonSearch()
     {
         await Search();
     }
 
+
     private async Task Search()
     {
+        //Clear results before the search
         isLoading = true;
         results.Clear();
 
         try
         {
+            //Making an api request with the date range of the provided date + 7 days after it (Thats the longest rage the API will allow).
             string apiKey = "yhOmsJLxTQMdT9kCgMeoyosvgyQVSYx4gLbz0eHR";
-
             List<NearEarthObject> asteroids = new();
-
             string url = $"https://api.nasa.gov/neo/rest/v1/feed?start_date={startDate:yyyy-MM-dd}&end_date={startDate.AddDays(7):yyyy-MM-dd}&api_key={apiKey}";
-
             var feedRoot = await Http.GetFromJsonAsync<NeoFeedRoot>(url);
 
+            //Obtaining the objects from the API
             if (feedRoot?.near_earth_objects != null)
             {
                 asteroids = feedRoot.near_earth_objects
@@ -186,6 +196,7 @@ else
                 .ToList();
             }
 
+            //Looping over each result to proccess and save it
             foreach (var a in asteroids)
             {
                 var approach = a.close_approach_data?.FirstOrDefault();
@@ -194,33 +205,36 @@ else
 
                 var vel = approach?.relative_velocity?.kilometers_per_hour;
 
-                // Convert to numbers safely and remove decimals
+                // Removing the long decimal parts in the values provided by the API
                 string missRounded = "";
                 if (double.TryParse(miss, out double missVal))
-                    missRounded = ((int)missVal).ToString();  // or Math.Round(missVal)
+                    missRounded = ((int)missVal).ToString();
 
                 string velRounded = "";
                 if (double.TryParse(vel, out double velVal))
                     velRounded = ((int)velVal).ToString();
 
+                //Adding the result to the result list
                 results.Add(new ImageCard
                 {
                     Title = a.name,
                     Date = approach?.close_approach_date ?? "No Date",
                     Description =
-                $"ID: {a.id}\n" +
-                $"Absolute Magnitude: {a.absolute_magnitude_h}\n" +
-                $"Diameter (km): {a.estimated_diameter?.kilometers?.estimated_diameter_min:0.00} - " +
-                $"{a.estimated_diameter?.kilometers?.estimated_diameter_max:0.00}\n" +
-                $"Hazardous: {a.is_potentially_hazardous_asteroid}\n" +
-                $"Closest Approach: {missRounded} km\n" +
-                $"Velocity: {velRounded} km/h",
+                        $"ID: {a.id}\n" +
+                        $"Absolute Magnitude: {a.absolute_magnitude_h}\n" +
+                        $"Diameter (km): {a.estimated_diameter?.kilometers?.estimated_diameter_min:0.00} - " +
+                        $"{a.estimated_diameter?.kilometers?.estimated_diameter_max:0.00}\n" +
+                        $"Hazardous: {a.is_potentially_hazardous_asteroid}\n" +
+                        $"Closest Approach: {missRounded} km\n" +
+                        $"Velocity: {velRounded} km/h",
+                    //Assigining a random asteroid image based on the danger posed from local storage as the API does not provide one.
                     ImageUrl = "Asteroid" + a.is_potentially_hazardous_asteroid + r.Next(0, 3) + ".jpg",
                     Hazardous = a.is_potentially_hazardous_asteroid.ToString(),
                     JPLUrl = a.nasa_jpl_url
                 });
             }
         }
+        //Catching API request exceptions 
         catch (Exception ex)
         {
             Console.WriteLine("NEO Error: " + ex.Message);
@@ -229,12 +243,12 @@ else
         isLoading = false;
     }
 
+    //Functions to focus and unfocus NEObjects
     void OpenImage(ImageCard item)
     {
         JS.InvokeVoidAsync("disableScroll");
         selectedItem = item;
     }
-
     void CloseImage()
     {
         JS.InvokeVoidAsync("enableScroll");

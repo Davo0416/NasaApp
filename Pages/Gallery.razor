@@ -4,20 +4,24 @@
 
 <PageTitle>Image Gallery</PageTitle>
 
+<!-- Title, SearchBar and the Search Button -->
 <div style="display:flex;">
     <h1 class="white" style="margin-right:20px; width:fit-content; white-space: nowrap;">Image Gallery</h1>
     <input @bind="query" @bind:event="oninput" @onkeydown="HandleKeyPress" type="text" placeholder="Search...">
     <button @onclick="Search" type="button"><span class="oi oi-magnifying-glass" aria-hidden="true"></span></button>
 </div>
 
+<!-- Displaying a loading message while the data is being requested from the API -->
 @if (isLoading)
 {
     <p class="white">Loading...</p>
 }
+<!-- Displaying a no results message if the API returned with no results -->
 else if (results == null || results.Count == 0)
 {
     <p class="white">No results.</p>
 }
+<!-- Displaying the images and associated information provided by the API -->
 else
 {
     <div class="imageCardContainer">
@@ -35,6 +39,7 @@ else
                     <h3 class="imageCardTitle">@item.Title</h3>
                 </div>
             </div>
+            <!-- Displaying a focused version of the image with extra information when clicked -->
             @if (selectedItem != null)
             {
                 <div class="modal-overlay" @onclick="CloseImage">
@@ -56,6 +61,7 @@ else
 }
 
 @code {
+    //Class to store the Image information
     public class ImageCard
     {
         public string? Title { get; set; }
@@ -66,14 +72,15 @@ else
 
     string query = "";
     bool isLoading = false;
-
     List<ImageCard> results = new();
 
+    //Trigger a search with an empty query on page load
     protected override async Task OnInitializedAsync()
     {
         await Search();
     }
 
+    //Trigger search on Enter press
     private async Task HandleKeyPress(KeyboardEventArgs e)
     {
         if (e.Key == "Enter")
@@ -81,25 +88,29 @@ else
             await Search();
         }
     }
+
+    //Search function to request images (filtered by the provided query) from the API. (no API key requred for this one)
     private async Task Search()
     {
+        //Clear previous results
+        results.Clear();
+
+        //Exit with no results if query is null
         if (query == null)
         {
-            results.Clear();
             return;
         }
 
         isLoading = true;
-        results.Clear();
 
         try
         {
+            // Making an API request with the query and storing the results
             var url = $"https://images-api.nasa.gov/search?q={query}&media_type=image";
-
-            var root = await Http.GetFromJsonAsync<NasaSearchRoot>(url);
-
+            NasaSearchRoot? root = await Http.GetFromJsonAsync<NasaSearchRoot>(url);
             var items = root?.collection?.items ?? new List<Item>();
 
+            // Creating an image card foreach returned image result 
             foreach (var item in items)
             {
                 var data = item.data?.FirstOrDefault();
@@ -117,6 +128,7 @@ else
                 });
             }
         }
+        //Catching API request exceptions
         catch (Exception ex)
         {
             Console.WriteLine("NASA Error: " + ex.Message);
@@ -127,18 +139,20 @@ else
         
     }
     ImageCard? selectedItem;
+
+    //Functions to focus and unfocus Images
     void OpenImage(ImageCard item)
     {
         JS.InvokeVoidAsync("disableScroll");
         selectedItem = item;
     }
-
     void CloseImage()
     {
         JS.InvokeVoidAsync("enableScroll");
         selectedItem = null;
     }
 
+    //Helper classes for processing the image data
     public class NasaSearchRoot
     {
         public Collection? collection { get; set; }

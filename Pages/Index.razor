@@ -1,6 +1,6 @@
 ﻿@page "/"
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Home</PageTitle>
 
 <div style="
     display:flex;
@@ -9,40 +9,41 @@
     align-items:center;
     min-height:95vh;       
 ">
-  <h1 class="white" style="text-align:center; margin-bottom:50px; margin-top:20px">
-      Explore data provided by the NASA API
-  </h1>
-
-  <div style="
+    <h1 class="white" style="text-align:center; margin-bottom:50px; margin-top:20px">
+        Explore data provided by the NASA API
+    </h1>
+    <!-- Displaying Image Cards that redirect the user to 3 different parts of the webpage -->
+    <div style="
       display:flex;
       justify-content:center;
       gap:40px;
       flex-wrap:wrap;
-  ">
+    ">
+        <!-- APOD Card -->
+        <div class="home-card" @onclick="@(() => NavigateTo("/apod"))">
+            <img src="apod.jpg" class="home-card-img" />
+            <h2 class="white" style="margin-top:20px">Picture of the Day</h2>
+            <p class="white">The universe, one stunning image at a time.</p>
+        </div>
+        <!-- Image Gallery Card -->
+        <div class="home-card" @onclick="@(() => NavigateTo("/gallery"))">
+            <img src="gallery.jpg" class="home-card-img" />
+            <h2 class="white" style="margin-top:20px">NASA Image Gallery</h2>
+            <p class="white">Browse thousands of photos from space missions.</p>
+        </div>
+        <!-- NEObjects Card -->
+        <div class="home-card" @onclick="@(() => NavigateTo("/NEObjects"))">
+            <img src="AsteroidTrue0.jpg" class="home-card-img" />
+            <h2 class="white" style="margin-top:20px">Near-Earth Objects</h2>
+            <p class="white">Track asteroids approaching Earth.</p>
+        </div>
 
-      <div class="home-card" @onclick="@(() => NavigateTo("/apod"))">
-          <img src="apod.jpg" class="home-card-img" />
-          <h2 class="white" style="margin-top:20px">Picture of the Day</h2>
-          <p class="white">The universe, one stunning image at a time.</p>
-      </div>
-
-      <div class="home-card" @onclick="@(() => NavigateTo("/gallery"))">
-          <img src="gallery.jpg" class="home-card-img" />
-          <h2 class="white" style="margin-top:20px">NASA Image Gallery</h2>
-          <p class="white">Browse thousands of photos from space missions.</p>
-      </div>
-
-      <div class="home-card" @onclick="@(() => NavigateTo("/NEObjects"))">
-          <img src="AsteroidTrue0.jpg" class="home-card-img" />
-          <h2 class="white" style="margin-top:20px">Near-Earth Objects</h2>
-          <p class="white">Track asteroids approaching Earth.</p>
-      </div>
-
-  </div>
+    </div>
 </div>
 @code {
-    [Inject] NavigationManager? Nav { get; set; }
 
+    //Code to handle page navigation using the Image Cards above
+    [Inject] NavigationManager? Nav { get; set; }
     void NavigateTo(string url)
     {
         Nav?.NavigateTo(url);
