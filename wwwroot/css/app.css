@@ -186,6 +186,29 @@ button:active {
     overflow-y: auto;
 }
 
+.home-card {
+    width: 30%;
+    border: 2px solid rgb(133, 126, 204);
+    border-radius: 10px;
+    padding: 15px;
+    background-image: linear-gradient(180deg, rgb(3, 19, 49) 0%, #1c0322 70%);
+    transition: 0.2s;
+    text-align: center;
+}
+
+.home-card:hover {
+    transform: scale(1.05);
+    border-color: white;
+}
+
+.home-card-img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }

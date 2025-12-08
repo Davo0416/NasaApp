@@ -62,7 +62,7 @@ else
     <div class="modal-overlay" @onclick="CloseImage">
         <div class="modal-content_@selectedItem.Hazardous" @onclick:stopPropagation="true">
             <img src="@selectedItem.ImageUrl"
-                style="width:100%; height:auto; object-fit:cover; border-radius: 10px; margin-bottom: 10px;" />
+                style="width:100%; object-fit:cover; border-radius: 10px; margin-bottom: 20px;" />
 
             <div style="display:flex; justify-content:space-between;">
                 <h2>@selectedItem.Title</h2>
@@ -73,14 +73,16 @@ else
                                   color: rgb(189, 28, 28);" class="oi oi-warning"></span>
                 }
             </div>
-
-            <pre style="white-space:pre-wrap; font-family:inherit;">
-    @selectedItem.Description
+            
+            <div style="display:flex; justify-content:space-between;">
+                <pre style="white-space:pre-wrap; font-family:inherit;">
+                    @selectedItem.Description
                 </pre>
-
-            <a href="@selectedItem.JPLUrl" target="_blank">View Source</a><br /><br />
-
-            <button style="border-radius: 5px; border:2px solid transparent;" @onclick="CloseImage">Close</button>
+                <div style="margin-top: 40px;">
+                    <a href="@selectedItem.JPLUrl" target="_blank">View Source</a><br /><br />
+                    <button style="border-radius: 5px; border:2px solid transparent; width:fit-content; float:right" @onclick="CloseImage">Close</button>
+                </div>
+            </div>
         </div>
     </div>
 }
@@ -188,6 +190,19 @@ else
             {
                 var approach = a.close_approach_data?.FirstOrDefault();
 
+                var miss = approach?.miss_distance?.kilometers;
+
+                var vel = approach?.relative_velocity?.kilometers_per_hour;
+
+                // Convert to numbers safely and remove decimals
+                string missRounded = "";
+                if (double.TryParse(miss, out double missVal))
+                    missRounded = ((int)missVal).ToString();  // or Math.Round(missVal)
+
+                string velRounded = "";
+                if (double.TryParse(vel, out double velVal))
+                    velRounded = ((int)velVal).ToString();
+
                 results.Add(new ImageCard
                 {
                     Title = a.name,
@@ -198,9 +213,9 @@ else
                 $"Diameter (km): {a.estimated_diameter?.kilometers?.estimated_diameter_min:0.00} - " +
                 $"{a.estimated_diameter?.kilometers?.estimated_diameter_max:0.00}\n" +
                 $"Hazardous: {a.is_potentially_hazardous_asteroid}\n" +
-                $"Closest Approach: {approach?.miss_distance?.kilometers} km\n" +
-                $"Velocity: {approach?.relative_velocity?.kilometers_per_hour} km/h",
-                    ImageUrl = "Asteroid" + a.is_potentially_hazardous_asteroid + r.Next(0, 2) + ".jpg",
+                $"Closest Approach: {missRounded} km\n" +
+                $"Velocity: {velRounded} km/h",
+                    ImageUrl = "Asteroid" + a.is_potentially_hazardous_asteroid + r.Next(0, 3) + ".jpg",
                     Hazardous = a.is_potentially_hazardous_asteroid.ToString(),
                     JPLUrl = a.nasa_jpl_url
                 });

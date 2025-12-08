@@ -18,6 +18,13 @@ else
             {
                 <img src="@apod.Url" style="max-width:100%; width:100%; border-radius:10px;" />
             }
+            else if (apod.Media_type == "video")
+            {
+                <iframe src="@apod.Url"
+                    style="max-width:100%; width:100%;height: 80vh; border-radius:10px; border:none;"
+                    allowfullscreen>
+                </iframe>
+            }
         </div>
         <div class="description">
             <p style="color:rgb(200, 126, 204)"><strong>Date:</strong> @apod.Date</p>
