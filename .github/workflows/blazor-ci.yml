@@ -32,6 +32,7 @@ jobs:
         cd tests
         npx playwright install --with-deps
 
+
     # Install .NET SDK (needed to build your Blazor app)
     - name: Setup .NET 8
       uses: actions/setup-dotnet@v4
@@ -48,7 +49,7 @@ jobs:
     - name: Run Playwright E2E Tests
       run: |
         cd tests
-        npx playwright test --reporter=line --output=../test-results
+        npx playwright test --reporter=line --output=../test-results --base-url=http://localhost:5047
 
     # Upload test results
     - name: Upload Playwright Test Results
