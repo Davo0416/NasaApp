@@ -28,8 +28,9 @@ jobs:
         npm install
 
     - name: Install Playwright Browsers
-      uses: microsoft/playwright-github-action@v1
-
+      run: |
+        cd tests
+        npx playwright install --with-deps
 
     # Install .NET SDK (needed to build your Blazor app)
     - name: Setup .NET 8
