@@ -33,23 +33,28 @@ jobs:
         npx playwright install --with-deps
 
 
-    # Install .NET SDK (needed to build your Blazor app)
+    # Install .NET SDK (needed to build Blazor app)
     - name: Setup .NET 8
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    # Restore + Build your Blazor project
+    # Restore + Build Blazor project
     - name: Build Blazor WASM app
       run: |
         dotnet restore
         dotnet build -c Release
 
+     # Run Blazor project
+    - name: Start Blazor App
+      run: dotnet run -c Release &
+    - run: sleep 10  # wait for app to start
+
     # Run Playwright Tests
     - name: Run Playwright E2E Tests
       run: |
         cd tests
-        npx playwright test --reporter=line --output=../test-results --base-url=http://localhost:5047
+        npx playwright test --reporter=line --output=../test-results
 
     # Upload test results
     - name: Upload Playwright Test Results
