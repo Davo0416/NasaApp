@@ -1,4 +1,4 @@
-name: Build & Test (Playwright)
+name: Build, Test & Deploy (Blazor + Playwright)
 
 on:
   push:
@@ -11,73 +11,86 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout code
-    - name: Checkout
-      uses: actions/checkout@v4
+      # Checkout code
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # Install Node.js
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    # Install dependencies & Playwright browsers
-    - name: Install Node dependencies
-      run: |
-        cd tests
-        npm install
+      # Cache Node modules & Playwright browsers
+      - name: Cache Node modules & Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: |
+            tests/node_modules
+            tests/playwright/.local-browsers
+          key: ${{ runner.os }}-node-${{ hashFiles('tests/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-    - name: Install Playwright Browsers
-      run: |
-        cd tests
-        npx playwright install --with-deps
+      # Install Node dependencies
+      - name: Install Node dependencies
+        run: |
+          cd tests
+          npm install
 
+      # Install Playwright (only Chromium for speed)
+      - name: Install Playwright Browsers
+        run: |
+          cd tests
+          npx playwright install chromium
 
-    # Install .NET SDK (needed to build Blazor app)
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
+      # Setup .NET 8
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-    # Restore + Build Blazor project
-    - name: Build Blazor WASM app
-      run: |
-        dotnet restore
-        dotnet build -c Release
+      # Restore + Build Blazor project
+      - name: Build Blazor WASM app
+        run: |
+          dotnet restore
+          dotnet build -c Release
 
-     # Run Blazor project
-    - name: Start Blazor App
-      run: dotnet run -c Release &
-    - run: sleep 10  # wait for app to start
+      # Publish Blazor app
+      - name: Publish Blazor WASM
+        run: dotnet publish -c Release -o build_output
 
-    # Run Playwright Tests
-    - name: Run Playwright E2E Tests
-      run: |
-        cd tests
-        npx playwright test --reporter=line --output=../test-results
+      # Serve Blazor app in background
+      - name: Serve Blazor App
+        run: |
+          npx http-server build_output/wwwroot -p 5047 &
+      
+      # Wait for server to be ready
+      - name: Wait for Blazor App
+        run: npx wait-on http://localhost:5047
 
-    # Upload test results
-    - name: Upload Playwright Test Results
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-test-results
-        path: test-results
-    
-    # Publish Blazor WASM
-    - name: Publish Blazor WASM
-      run: dotnet publish -c Release -o build_output
+      # Run Playwright E2E Tests
+      - name: Run Playwright E2E Tests
+        run: |
+          cd tests
+          npx playwright test --reporter=line --output=../test-results
 
-    # Upload artifact for GitHub Pages
-    - name: Upload artifact for GitHub Pages
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: build_output/wwwroot
+      # Upload Playwright test results
+      - name: Upload Playwright Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
 
-  # Deploy to GitHub Pages
+      # Upload artifact for GitHub Pages
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build_output/wwwroot
+
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-
     permissions:
       pages: write
       id-token: write
