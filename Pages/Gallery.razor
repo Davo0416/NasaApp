@@ -39,23 +39,23 @@ else
                     <h3 class="imageCardTitle">@item.Title</h3>
                 </div>
             </div>
-            <!-- Displaying a focused version of the image with extra information when clicked -->
-            @if (selectedItem != null)
-            {
-                <div class="modal-overlay" @onclick="CloseImage">
-                    <div class="modal-content" @onclick:stopPropagation="true">
+        }
+        <!-- Displaying a focused version of the image with extra information when clicked -->
+        @if (selectedItem != null)
+        {
+            <div class="modal-overlay" @onclick="CloseImage">
+                <div class="modal-content" @onclick:stopPropagation="true">
 
-                        <img src="@selectedItem.ImageUrl"
-                            style="width:100%; object-fit:contain; max-height:60vh; margin-bottom:20px;" />
+                    <img src="@selectedItem.ImageUrl"
+                        style="width:100%; object-fit:contain; max-height:60vh; margin-bottom:20px;" />
 
-                        <h2>@selectedItem.Title</h2>
-                        <p><strong>Date:</strong> @selectedItem.Date</p>
-                        <p>@selectedItem.Description</p>
+                    <h2>@selectedItem.Title</h2>
+                    <p><strong>Date:</strong> @selectedItem.Date</p>
+                    <p>@selectedItem.Description</p>
 
-                        <button style="border-radius: 5px; border:2px solid transparent;" @onclick="CloseImage">Close</button>
-                    </div>
+                    <button style="border-radius: 5px; border:2px solid transparent;" @onclick="CloseImage">Close</button>
                 </div>
-            }
+            </div>
         }
     </div>
 }
