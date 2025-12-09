@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Test for correct Gallery Title', async ({ page }) => {
   //GOTO Gallery
-  await page.goto('/gallery');
+  await page.goto('gallery');
   //Find title
   const title = page.locator('h1');
   //Check for a match
@@ -11,7 +11,7 @@ test('Test for correct Gallery Title', async ({ page }) => {
 
 test('Test initial image cards loading', async ({ page }) => {
   //GOTO Gallery
-  await page.goto('/gallery');
+  await page.goto('gallery');
 
   //Find the first imageCard, expect it to load in appropriate time
   const firstImageCard = page.locator('.imageCard').first();
@@ -20,7 +20,7 @@ test('Test initial image cards loading', async ({ page }) => {
 
 test('Test search functionality updates first image card', async ({ page }) => {
   //GOTO Gallery
-  await page.goto('/gallery');
+  await page.goto('gallery');
 
   //Wait for the first image card to appear
   const firstImageCardBefore = page.locator('.imageCard').first();
@@ -50,7 +50,7 @@ test('Test search functionality updates first image card', async ({ page }) => {
 
 test('Test if image modal opens with correct content', async ({ page }) => {
   //GOTO Gallery
-  await page.goto('/gallery');
+  await page.goto('gallery');
 
   //Click first image card
   const firstImageCard = page.locator('.imageCard').first();

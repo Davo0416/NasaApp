@@ -60,6 +60,23 @@ jobs:
       - name: Publish Blazor WASM
         run: dotnet publish -c Release -o build_output
 
+      # Serve Blazor app & Run Playwright Tests
+      - name: Serve + Run Playwright Tests
+        run: |
+          cd tests
+          npm install -g http-server start-server-and-test
+          npx start-server-and-test "http-server ../build_output/wwwroot -p 5047" http://localhost:5047 "npx playwright test --reporter=line --output=../test-results"
+        env:
+          BASE_URL: http://localhost:5047
+
+
+      # Upload Playwright test results
+      - name: Upload Playwright Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-test-results
+          path: test-results
+
       # Upload artifact for GitHub Pages
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
