@@ -1,0 +1,76 @@
+name: Build & Test (Playwright)
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout code
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    # Install Node.js
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    # Install dependencies & Playwright browsers
+    - name: Install Playwright dependencies
+      run: |
+        cd tests
+        npm install
+        npx playwright install --with-deps
+
+    # Install .NET SDK (needed to build your Blazor app)
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    # Restore + Build your Blazor project
+    - name: Build Blazor WASM app
+      run: |
+        dotnet restore
+        dotnet build -c Release
+
+    # Run Playwright Tests
+    - name: Run Playwright E2E Tests
+      run: |
+        cd tests
+        npx playwright test --reporter=line --output=../test-results
+
+    # Upload test results
+    - name: Upload Playwright Test Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-test-results
+        path: test-results
+    # Publish Blazor WASM
+    - name: Publish Blazor WASM
+      run: dotnet publish -c Release -o build_output
+
+    # Upload artifact for GitHub Pages
+    - name: Upload artifact for GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: build_output/wwwroot
+
+    # Deploy to GitHub Pages
+    deploy:
+      needs: build-and-test
+      runs-on: ubuntu-latest
+
+      permissions:
+        pages: write
+        id-token: write
+
+      steps:
+        - name: Deploy to GitHub Pages
+          uses: actions/deploy-pages@v4
