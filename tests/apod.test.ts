@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Test for correct APOD Title', async ({ page }) => {
   //GOTO APOD
-  await page.goto('http://localhost:5047/NasaApp/apod');
+  await page.goto('NasaApp/apod');
   //Find title
   const title = page.locator('h1');
   //Check for a match
@@ -11,7 +11,7 @@ test('Test for correct APOD Title', async ({ page }) => {
 
 test('Test for Image/Video content on APOD page', async ({ page }) => {
   //GOTO APOD
-  await page.goto('http://localhost:5047/NasaApp/apod');
+  await page.goto('NasaApp/apod');
 
   //Find image & check if is loaded (Meaning API request was successful)
   const image = page.locator('img');
@@ -32,7 +32,7 @@ test('Test for Image/Video content on APOD page', async ({ page }) => {
 
 test('Test image date & description fetch on APOD page', async ({ page }) => {
   //GOTO APOD
-  await page.goto('http://localhost:5047/NasaApp/apod');
+  await page.goto('NasaApp/apod');
   //Find the first paragraph
   const firstParagraph = page.locator('p').first();
   //Check if it contains the text "Date:" (Meaning the date & description of the image were successfuly obtained from the API)
