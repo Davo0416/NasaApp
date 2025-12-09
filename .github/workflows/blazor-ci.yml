@@ -38,7 +38,7 @@ jobs:
           cd tests
           npm install
 
-      # Install Playwright (only Chromium for speed)
+      # Install Playwright (Chromium only for speed)
       - name: Install Playwright Browsers
         run: |
           cd tests
@@ -60,20 +60,11 @@ jobs:
       - name: Publish Blazor WASM
         run: dotnet publish -c Release -o build_output
 
-      # Serve Blazor app in background
-      - name: Serve Blazor App
-        run: |
-          npx http-server build_output/wwwroot -p 5047 &
-      
-      # Wait for server to be ready
-      - name: Wait for Blazor App
-        run: npx wait-on http://localhost:5047
-
-      # Run Playwright E2E Tests
-      - name: Run Playwright E2E Tests
+      # Serve Blazor app & Run Playwright Tests
+      - name: Serve + Run Playwright Tests
         run: |
           cd tests
-          npx playwright test --reporter=line --output=../test-results
+          npx start-server-and-test "http-server ../build_output/wwwroot -p 5047" http://localhost:5047 "npx playwright test --reporter=line --output=../test-results"
         env:
           BASE_URL: http://localhost:5047
 
