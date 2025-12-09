@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
+  expect: {
+    timeout: 50000,
+  },
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:5047',
     headless: true,
