@@ -22,14 +22,10 @@ jobs:
         node-version: 20
 
     # Install dependencies & Playwright browsers
-    - name: Install Node dependencies
+    - name: Install Node dependencies & Playwright Browsers
       run: |
         cd tests
-        npm install
-
-    - name: Install Playwright Browsers
-      run: |
-        cd tests
+        npm install --unsafe-perm
         npx playwright install --with-deps
 
     # Install .NET SDK (needed to build your Blazor app)
