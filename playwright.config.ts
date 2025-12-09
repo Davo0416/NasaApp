@@ -3,8 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   use: {
-    baseURL: 'http://localhost:5047', // your Blazor app URL
-    headless: false,
+    baseURL: process.env.BASE_URL || 'http://localhost:5047', // your Blazor app URL
+    headless: true,
     ignoreHTTPSErrors: true, // because localhost uses HTTPS
     viewport: { width: 1280, height: 720 },
   },
