@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Test for correct Near Earth Objects Title', async ({ page }) => {
   //GOTO NEObjects
-  await page.goto('http://localhost:5047/NasaApp/NEObjects');
+  await page.goto('/NEObjects');
   //Find title
   const title = page.locator('h1');
   //Check for a match
@@ -11,7 +11,7 @@ test('Test for correct Near Earth Objects Title', async ({ page }) => {
 
 test('Test initial NEObject image cards loading', async ({ page }) => {
   //GOTO Gallery
-  await page.goto('http://localhost:5047/NasaApp/NEObjects');
+  await page.goto('/NEObjects');
 
   //Find the first imageCard, expect it to load in appropriate time
   const firstImageCard = page.locator('.imageCard_False').first();
@@ -20,7 +20,7 @@ test('Test initial NEObject image cards loading', async ({ page }) => {
 
 test('Test NEO search updates the image cards when date changes', async ({ page }) => {
   //GOTO NEObjects
-  await page.goto('http://localhost:5047/NasaApp/NEObjects');
+  await page.goto('/NEObjects');
 
   //Wait for initial results to load
   const firstCardBefore = page.locator('.imageCard_True, .imageCard_False').first();
@@ -56,7 +56,7 @@ test('Test NEO search updates the image cards when date changes', async ({ page 
 
 test('Test if image modal opens with correct content', async ({ page }) => {
   //GOTO NEObjects
-  await page.goto('http://localhost:5047/NasaApp/NEObjects');
+  await page.goto('/NEObjects');
 
   //Find and click the first image card
   const firstImageCard = page.locator('.imageCard_True').first();
