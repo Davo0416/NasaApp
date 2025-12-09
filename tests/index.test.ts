@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Check redirection to /apod', async ({ page }) => {
   //GOTO Home
-  await page.goto('');
+  await page.goto('http://localhost:5047/NasaApp');
 
   //Click 1st card
   const apodCard = page.locator('.home-card').nth(0);
@@ -14,7 +14,7 @@ test('Check redirection to /apod', async ({ page }) => {
 
 test('Check redirection to /gallery', async ({ page }) => {
   //GOTO Home
-  await page.goto('');
+  await page.goto('http://localhost:5047/NasaApp');
 
   //Click 2nd card
   const galleryCard = page.locator('.home-card').nth(1);
@@ -26,7 +26,7 @@ test('Check redirection to /gallery', async ({ page }) => {
 
 test('Check redirection to /NEObjects', async ({ page }) => {
   //GOTO Home
-  await page.goto('');
+  await page.goto('http://localhost:5047/NasaApp');
 
   //Click 3rd card
   const neoCard = page.locator('.home-card').nth(2);
