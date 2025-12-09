@@ -20,19 +20,19 @@
       flex-wrap:wrap;
     ">
         <!-- APOD Card -->
-        <div class="home-card" @onclick="@(() => NavigateTo("/apod"))">
+        <div class="home-card" @onclick="@(() => NavigateTo("apod"))">
             <img src="apod.jpg" class="home-card-img" />
             <h2 class="white" style="margin-top:20px">Picture of the Day</h2>
             <p class="white">The universe, one stunning image at a time.</p>
         </div>
         <!-- Image Gallery Card -->
-        <div class="home-card" @onclick="@(() => NavigateTo("/gallery"))">
+        <div class="home-card" @onclick="@(() => NavigateTo("gallery"))">
             <img src="gallery.jpg" class="home-card-img" />
             <h2 class="white" style="margin-top:20px">NASA Image Gallery</h2>
             <p class="white">Browse thousands of photos from space missions.</p>
         </div>
         <!-- NEObjects Card -->
-        <div class="home-card" @onclick="@(() => NavigateTo("/NEObjects"))">
+        <div class="home-card" @onclick="@(() => NavigateTo("NEObjects"))">
             <img src="AsteroidTrue0.jpg" class="home-card-img" />
             <h2 class="white" style="margin-top:20px">Near-Earth Objects</h2>
             <p class="white">Track asteroids approaching Earth.</p>
